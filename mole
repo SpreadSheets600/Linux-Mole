@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/lib/core/commands.sh"
 
 trap cleanup_temp_files EXIT INT TERM
 
-DEFAULT_MOLE_REPO="SpreadSheets600/Mole"
+DEFAULT_MOLE_REPO="SpreadSheets600/linux-mole"
 MOLE_REPO="${MOLE_REPO:-$DEFAULT_MOLE_REPO}"
 MOLE_REPO="${MOLE_REPO#https://github.com/}"
 MOLE_REPO="${MOLE_REPO%.git}"

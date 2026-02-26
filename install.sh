@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-DEFAULT_MOLE_REPO="SpreadSheets600/Mole"
+DEFAULT_MOLE_REPO="SpreadSheets600/linux-mole"
 MOLE_REPO="${MOLE_REPO:-$DEFAULT_MOLE_REPO}"
 MOLE_REPO="${MOLE_REPO#https://github.com/}"
 MOLE_REPO="${MOLE_REPO%.git}"
