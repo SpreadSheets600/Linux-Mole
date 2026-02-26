@@ -12,14 +12,25 @@
 
 ## Quick Start
 
-**Install via script:**
+**Install (stable release):**
 
 ```bash
-# Optional args: -s latest for main branch code, -s 1.17.0 for specific version
 curl -fsSL https://raw.githubusercontent.com/tw93/mole/main/install.sh | bash
 ```
 
-**Distribute from your fork:**
+**Install latest main branch (nightly/edge):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tw93/mole/main/install.sh | bash -s -- latest
+```
+
+**Install a specific version:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tw93/mole/main/install.sh | bash -s -- 1.27.0
+```
+
+**Install from your fork:**
 
 ```bash
 # Replace YOUR_GITHUB_USERNAME with your account name
