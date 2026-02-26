@@ -44,10 +44,24 @@ jobs:
         include:
           - os: macos-latest
             target: release-amd64
-            artifact_name: binaries-amd64
+            platform: darwin
+            arch: amd64
+            artifact_name: binaries-darwin-amd64
           - os: macos-latest
             target: release-arm64
-            artifact_name: binaries-arm64
+            platform: darwin
+            arch: arm64
+            artifact_name: binaries-darwin-arm64
+          - os: ubuntu-latest
+            target: release-linux-amd64
+            platform: linux
+            arch: amd64
+            artifact_name: binaries-linux-amd64
+          - os: ubuntu-latest
+            target: release-linux-arm64
+            platform: linux
+            arch: arm64
+            artifact_name: binaries-linux-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
@@ -63,6 +77,7 @@ jobs:
           ls -l bin/
 
       - name: Package binaries for Homebrew
+        if: ${{ matrix.platform == 'darwin' }}
         run: |
           cd bin
           # Package binaries into tar.gz for Homebrew resource
@@ -74,11 +89,19 @@ jobs:
             ls -lh binaries-darwin-amd64.tar.gz
           fi
 
-      - name: Upload artifacts
+      - name: Upload binary artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ matrix.artifact_name }}
-          path: bin/*-darwin-*
+          path: bin/*-${{ matrix.platform }}-*
+          retention-days: 1
+
+      - name: Upload Homebrew tarball
+        if: ${{ matrix.platform == 'darwin' }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: homebrew-${{ matrix.platform }}-${{ matrix.arch }}
+          path: bin/binaries-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
           retention-days: 1
 
   release:
@@ -90,7 +113,7 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: bin
-          pattern: binaries-*
+          pattern: '*'
           merge-multiple: true
 
       - name: Display structure of downloaded files
