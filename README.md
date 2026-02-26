@@ -15,19 +15,19 @@
 **Install (stable release):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/Mole/main/install.sh | MOLE_REPO="SpreadSheets600/Mole" bash
+curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/linux-mole/main/install.sh | MOLE_REPO="SpreadSheets600/linux-mole" bash
 ```
 
 **Install latest main branch (nightly/edge):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/Mole/main/install.sh | MOLE_REPO="SpreadSheets600/Mole" bash -s -- latest
+curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/linux-mole/main/install.sh | MOLE_REPO="SpreadSheets600/linux-mole" bash -s -- latest
 ```
 
 **Install a specific version:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/Mole/main/install.sh | MOLE_REPO="SpreadSheets600/Mole" bash -s -- 1.27.0
+curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/linux-mole/main/install.sh | MOLE_REPO="SpreadSheets600/linux-mole" bash -s -- 1.27.0
 ```
 
 **Linux/WSL support:** `mo clean`, `mo optimize`, `mo installer`, `mo analyze`, `mo purge`, and `mo status` are optimized for Linux and WSL.
@@ -70,7 +70,7 @@ $ ./mole --help
 __  __       _
 |  \/  | ___ | | ___
 | |\/| |/ _ \| |/ _ \
-| |  | | (_) | |  __/  https://github.com/SpreadSheets600/Mole
+| |  | | (_) | |  __/  https://github.com/SpreadSheets600/linux-mole
 |_|  |_|\___/|_|\___|  Deep clean and optimize your Linux system.
 ...
   mo analyze /mnt              Analyze external drives only
@@ -265,7 +265,7 @@ Select Installers to Remove - 3.8GB (5 selected)
 Launch Linux-Mole commands from Raycast or Alfred:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/Mole/main/scripts/setup-quick-launchers.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SpreadSheets600/linux-mole/main/scripts/setup-quick-launchers.sh | bash
 ```
 
 Adds 5 commands: `Linux-Mole Clean`, `Linux-Mole Uninstall`, `Linux-Mole Optimize`, `Linux-Mole Analyze`, `Linux-Mole Status`.
