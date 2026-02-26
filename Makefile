@@ -21,7 +21,11 @@ all: build
 # Local build (current architecture)
 build:
 	@echo "Building for local architecture..."
-	go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(ANALYZE)-go $(ANALYZE_SRC)
+	@if [ "$$(go env GOOS)" = "darwin" ] || [ "$$(go env GOOS)" = "linux" ]; then \
+		go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(ANALYZE)-go $(ANALYZE_SRC); \
+	else \
+		echo "Skipping analyze-go on $$(go env GOOS) (supported: darwin, linux)"; \
+	fi
 	go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(STATUS)-go $(STATUS_SRC)
 
 # Release build targets (run on native architectures for CGO support)
@@ -34,6 +38,16 @@ release-arm64:
 	@echo "Building release binaries (arm64)..."
 	GOOS=darwin GOARCH=arm64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(ANALYZE)-darwin-arm64 $(ANALYZE_SRC)
 	GOOS=darwin GOARCH=arm64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(STATUS)-darwin-arm64 $(STATUS_SRC)
+
+release-linux-amd64:
+	@echo "Building Linux release binaries (amd64)..."
+	GOOS=linux GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(ANALYZE)-linux-amd64 $(ANALYZE_SRC)
+	GOOS=linux GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(STATUS)-linux-amd64 $(STATUS_SRC)
+
+release-linux-arm64:
+	@echo "Building Linux release binaries (arm64)..."
+	GOOS=linux GOARCH=arm64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(ANALYZE)-linux-arm64 $(ANALYZE_SRC)
+	GOOS=linux GOARCH=arm64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(STATUS)-linux-arm64 $(STATUS_SRC)
 
 clean:
 	@echo "Cleaning binaries..."

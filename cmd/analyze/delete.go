@@ -1,20 +1,14 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync/atomic"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-const trashTimeout = 30 * time.Second
 
 func deletePathCmd(path string, counter *int64) tea.Cmd {
 	return func() tea.Msg {
@@ -77,16 +71,12 @@ func (e *multiDeleteError) Error() string {
 	return strings.Join(e.errors[:min(3, len(e.errors))], "; ")
 }
 
-// trashPathWithProgress moves a path to Trash using Finder.
-// This allows users to recover accidentally deleted files.
 func trashPathWithProgress(root string, counter *int64) (int64, error) {
-	// Verify path exists (use Lstat to handle broken symlinks).
 	info, err := os.Lstat(root)
 	if err != nil {
 		return 0, err
 	}
 
-	// Count items for progress reporting.
 	var count int64
 	if info.IsDir() {
 		_ = filepath.WalkDir(root, func(_ string, d os.DirEntry, err error) error {
@@ -108,7 +98,6 @@ func trashPathWithProgress(root string, counter *int64) (int64, error) {
 		}
 	}
 
-	// Move to Trash using Finder AppleScript.
 	if err := moveToTrash(root); err != nil {
 		return 0, err
 	}
@@ -116,31 +105,6 @@ func trashPathWithProgress(root string, counter *int64) (int64, error) {
 	return count, nil
 }
 
-// moveToTrash uses macOS Finder to move a file/directory to Trash.
-// This is the safest method as it uses the system's native trash mechanism.
 func moveToTrash(path string) error {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return fmt.Errorf("failed to resolve path: %w", err)
-	}
-
-	// Escape path for AppleScript (handle quotes and backslashes).
-	escapedPath := strings.ReplaceAll(absPath, "\\", "\\\\")
-	escapedPath = strings.ReplaceAll(escapedPath, "\"", "\\\"")
-
-	script := fmt.Sprintf(`tell application "Finder" to delete POSIX file "%s"`, escapedPath)
-
-	ctx, cancel := context.WithTimeout(context.Background(), trashTimeout)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "osascript", "-e", script)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if ctx.Err() == context.DeadlineExceeded {
-			return fmt.Errorf("timeout moving to Trash")
-		}
-		return fmt.Errorf("failed to move to Trash: %s", strings.TrimSpace(string(output)))
-	}
-
-	return nil
+	return moveToTrashPlatform(path)
 }

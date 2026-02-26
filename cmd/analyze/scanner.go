@@ -14,7 +14,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	"golang.org/x/sync/singleflight"
@@ -179,7 +178,7 @@ func scanPathConcurrent(root string, filesScanned, dirsScanned, bytesScanned *in
 			}
 
 			// ~/Library is scanned separately; reuse cache when possible.
-			if isHomeDir && child.Name() == "Library" {
+			if runtime.GOOS == "darwin" && isHomeDir && child.Name() == "Library" {
 				sem <- struct{}{}
 				wg.Add(1)
 				go func(name, path string) {
@@ -736,22 +735,15 @@ func getDirectoryLogicalSizeWithExclude(path string, excludePath string) (int64,
 }
 
 func getActualFileSize(_ string, info fs.FileInfo) int64 {
-	stat, ok := info.Sys().(*syscall.Stat_t)
-	if !ok {
-		return info.Size()
-	}
-
-	actualSize := stat.Blocks * 512
-	if actualSize < info.Size() {
-		return actualSize
+	if blocks := getStatBlocks(info); blocks > 0 {
+		actualSize := blocks * 512
+		if actualSize < info.Size() {
+			return actualSize
+		}
 	}
 	return info.Size()
 }
 
 func getLastAccessTimeFromInfo(info fs.FileInfo) time.Time {
-	stat, ok := info.Sys().(*syscall.Stat_t)
-	if !ok {
-		return time.Time{}
-	}
-	return time.Unix(stat.Atimespec.Sec, stat.Atimespec.Nsec)
+	return getAccessTime(info)
 }

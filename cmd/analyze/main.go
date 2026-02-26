@@ -1,12 +1,9 @@
-//go:build darwin
-
 package main
 
 import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -226,10 +223,7 @@ func createOverviewEntries() []dirEntry {
 		}
 	}
 
-	entries = append(entries,
-		dirEntry{Name: "Applications", Path: "/Applications", IsDir: true, Size: -1},
-		dirEntry{Name: "System Library", Path: "/Library", IsDir: true, Size: -1},
-	)
+	entries = append(entries, platformOverviewEntries()...)
 
 	return entries
 }
@@ -760,18 +754,14 @@ func (m model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 					}
 					for path := range m.largeMultiSelected {
 						go func(p string) {
-							ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-							defer cancel()
-							_ = exec.CommandContext(ctx, "open", p).Run()
+							_ = openPath(p)
 						}(path)
 					}
 					m.status = fmt.Sprintf("Opening %d items...", count)
 				} else {
 					selected := m.largeFiles[m.largeSelected]
 					go func(path string) {
-						ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-						defer cancel()
-						_ = exec.CommandContext(ctx, "open", path).Run()
+						_ = openPath(path)
 					}(selected.Path)
 					m.status = fmt.Sprintf("Opening %s...", selected.Name)
 				}
@@ -785,24 +775,19 @@ func (m model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				}
 				for path := range m.multiSelected {
 					go func(p string) {
-						ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-						defer cancel()
-						_ = exec.CommandContext(ctx, "open", p).Run()
+						_ = openPath(p)
 					}(path)
 				}
 				m.status = fmt.Sprintf("Opening %d items...", count)
 			} else {
 				selected := m.entries[m.selected]
 				go func(path string) {
-					ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-					defer cancel()
-					_ = exec.CommandContext(ctx, "open", path).Run()
+					_ = openPath(path)
 				}(selected.Path)
 				m.status = fmt.Sprintf("Opening %s...", selected.Name)
 			}
 		}
 	case "f", "F":
-		// Reveal in Finder (multi-select aware).
 		const maxBatchReveal = 20
 		if m.showLargeFiles {
 			if len(m.largeFiles) > 0 {
@@ -814,20 +799,16 @@ func (m model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 					}
 					for path := range m.largeMultiSelected {
 						go func(p string) {
-							ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-							defer cancel()
-							_ = exec.CommandContext(ctx, "open", "-R", p).Run()
+							_ = revealPath(p)
 						}(path)
 					}
-					m.status = fmt.Sprintf("Showing %d items in Finder...", count)
+					m.status = fmt.Sprintf("Showing %d items in %s...", count, revealTargetName())
 				} else {
 					selected := m.largeFiles[m.largeSelected]
 					go func(path string) {
-						ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-						defer cancel()
-						_ = exec.CommandContext(ctx, "open", "-R", path).Run()
+						_ = revealPath(path)
 					}(selected.Path)
-					m.status = fmt.Sprintf("Showing %s in Finder...", selected.Name)
+					m.status = fmt.Sprintf("Showing %s in %s...", selected.Name, revealTargetName())
 				}
 			}
 		} else if len(m.entries) > 0 {
@@ -839,20 +820,16 @@ func (m model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				}
 				for path := range m.multiSelected {
 					go func(p string) {
-						ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-						defer cancel()
-						_ = exec.CommandContext(ctx, "open", "-R", p).Run()
+						_ = revealPath(p)
 					}(path)
 				}
-				m.status = fmt.Sprintf("Showing %d items in Finder...", count)
+				m.status = fmt.Sprintf("Showing %d items in %s...", count, revealTargetName())
 			} else {
 				selected := m.entries[m.selected]
 				go func(path string) {
-					ctx, cancel := context.WithTimeout(context.Background(), openCommandTimeout)
-					defer cancel()
-					_ = exec.CommandContext(ctx, "open", "-R", path).Run()
+					_ = revealPath(path)
 				}(selected.Path)
-				m.status = fmt.Sprintf("Showing %s in Finder...", selected.Name)
+				m.status = fmt.Sprintf("Showing %s in %s...", selected.Name, revealTargetName())
 			}
 		}
 	case " ":

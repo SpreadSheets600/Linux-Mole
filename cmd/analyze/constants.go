@@ -176,6 +176,8 @@ var skipSystemDirs = map[string]bool{
 	"opt":                     false,
 	"usr":                     false,
 	"Volumes":                 true,
+	"mnt":                     true,
+	"media":                   true,
 	"Network":                 true,
 	".vol":                    true,
 	".Spotlight-V100":         true,
